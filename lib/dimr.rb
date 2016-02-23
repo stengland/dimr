@@ -8,13 +8,17 @@ module Dimr
       self.instance_eval(&block)
     end
 
-    def run(runable_klass, dependencies)
-      Runner.new(runable_klass, dependencies)
+    def run(runable_klass, dependencies, method = :run!)
+      factory(runable_klass, dependencies, method)
     end
     alias :command :run
     alias :query :run
 
-    Runner = Struct.new(:runable_klass, :dependencies) do
+    def factory(runable_klass, dependencies, method = nil)
+      Runner.new(runable_klass, dependencies, method)
+    end
+
+    Runner = Struct.new(:runable_klass, :dependencies, :method) do
       def call(*args)
         runable = runable_klass.new(*args)
 
@@ -22,7 +26,11 @@ module Dimr
           runable.send("#{key}=", value)
         end if dependencies
 
-        runable.run!
+        if method
+          runable.public_send(method)
+        else
+          runable
+        end
       end
     end
   end
