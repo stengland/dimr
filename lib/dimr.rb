@@ -3,8 +3,8 @@ require "dim"
 
 module Dimr
   class Container < Dim::Container
-    def initialize(&block)
-      super
+    def initialize(parent=nil, &block)
+      super(parent)
       self.instance_eval(&block)
     end
 
