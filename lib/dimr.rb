@@ -18,7 +18,14 @@ module Dimr
       Runner.new(runable_klass, dependencies, method)
     end
 
-    Runner = Struct.new(:runable_klass, :dependencies, :method) do
+    class Runner
+      attr_reader :runable_klass, :dependencies, :method
+
+      def initialize(runable_klass, dependencies, method = nil)
+        @runable_klass, @dependencies, @method =
+          runable_klass, dependencies, method
+      end
+
       def call(*args)
         runable = runable_klass.new(*args)
 

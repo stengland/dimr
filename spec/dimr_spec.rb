@@ -48,7 +48,6 @@ describe Dimr do
   end
 
   describe Dimr::Container::Runner do
-
     subject {
       described_class.new(Runable, service: Service, config: :test)
     }
@@ -59,9 +58,9 @@ describe Dimr do
       end
 
       context 'method is provided' do
-        before do
-          subject.method = :run!
-        end
+        subject {
+          described_class.new(Runable, {service: Service}, :run!)
+        }
         it 'runs the command and returns the result' do
           expect(subject.call(some: 'args')).to eq :success
         end
