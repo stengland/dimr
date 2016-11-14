@@ -47,21 +47,24 @@ describe Dimr do
     end
   end
 
-  describe Dimr::Runner do
+  describe Dimr::Factory do
     subject {
       described_class.new(Runable, service: Service, config: :test)
     }
 
     describe '#call' do
-      it 'injects the dependencies' do
+      it 'builds a runable object instance' do
+        expect(subject.call(some: 'args').class).to eq Runable
+      end
+      it 'injects the dependencies the runable instance' do
         expect(subject.call(some: 'args').service).to be Service
       end
 
-      context 'method is provided' do
+      context 'a run method is provided' do
         subject {
           described_class.new(Runable, {service: Service}, :run!)
         }
-        it 'runs the command and returns the result' do
+        it 'sends the run_method to runable instance and returns the result' do
           expect(subject.call(some: 'args')).to eq :success
         end
       end
