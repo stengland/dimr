@@ -18,7 +18,7 @@ describe Dimr do
       extend Dimr
 
       register :my_command do
-        run(
+        runner(
           Runable,
           service: Service,
           config: :test
@@ -59,16 +59,19 @@ describe Dimr do
       it 'injects the dependencies the runable instance' do
         expect(subject.call(some: 'args').service).to be Service
       end
-
-      context 'a run method is provided' do
-        subject {
-          described_class.new(Runable, {service: Service}, :run!)
-        }
-        it 'sends the run_method to runable instance and returns the result' do
-          expect(subject.call(some: 'args')).to eq :success
-        end
-      end
     end
   end
 
+  describe Dimr::Runner do
+    let(:factory) { Dimr::Factory.new(Runable, service: Service, config: :test) }
+    subject {
+      described_class.new(factory, :run!)
+    }
+
+    describe '#call' do
+      it 'sends the run_method to instance creaed by factory and returns the result' do
+        expect(subject.call(some: 'args')).to eq :success
+      end
+    end
+  end
 end
