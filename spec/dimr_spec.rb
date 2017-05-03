@@ -13,59 +13,65 @@ describe Dimr do
     expect(Dimr::VERSION).not_to be nil
   end
 
-  describe Dimr::Container do
-    subject {
-      Dimr::Container.new do
-        register :my_command do
-          run(
-            Runable,
-            service: Service,
-            config: :test
-          )
-        end
+  subject {
+    Module.new do
+      extend Dimr
 
-        register :my_factory do
-          factory(
-            Runable,
-            service: Service,
-            config: :test
-          )
-        end
+      register :my_command do
+        runner(
+          Runable,
+          service: Service,
+          config: :test
+        )
       end
-    }
 
-    describe '#run' do
-      it 'runs the command on the service' do
-        expect(subject.my_command.(some: 'args')).to eq :success
+      register :my_factory do
+        factory(
+          Runable,
+          service: Service,
+          config: :test
+        )
       end
     end
+  }
 
-    describe '#factory' do
-      it 'returns an instance of the runable' do
-        expect(subject.my_factory.(some: 'args')).to be_a Runable
-      end
+  describe '#run' do
+    it 'runs the command on the service' do
+      expect(subject.my_command.(some: 'args')).to eq :success
     end
   end
 
-  describe Dimr::Container::Runner do
+  describe '#factory' do
+    it 'returns an instance of the runable' do
+      expect(subject.my_factory.(some: 'args')).to be_a Runable
+    end
+  end
+
+  describe Dimr::Factory do
     subject {
       described_class.new(Runable, service: Service, config: :test)
     }
 
     describe '#call' do
-      it 'injects the dependencies' do
-        expect(subject.call(some: 'args').service).to be Service
+      it 'builds a runable object instance' do
+        expect(subject.call(some: 'args').class).to eq Runable
       end
-
-      context 'method is provided' do
-        subject {
-          described_class.new(Runable, {service: Service}, :run!)
-        }
-        it 'runs the command and returns the result' do
-          expect(subject.call(some: 'args')).to eq :success
-        end
+      it 'injects the dependencies the runable instance' do
+        expect(subject.call(some: 'args').service).to be Service
       end
     end
   end
 
+  describe Dimr::Runner do
+    let(:factory) { Dimr::Factory.new(Runable, service: Service, config: :test) }
+    subject {
+      described_class.new(factory, :run!)
+    }
+
+    describe '#call' do
+      it 'sends the run_method to instance creaed by factory and returns the result' do
+        expect(subject.call(some: 'args')).to eq :success
+      end
+    end
+  end
 end
