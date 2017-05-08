@@ -21,7 +21,7 @@ module Dimr
     @container ||= Dim::Container.new
   end
 
-  def_delegators :container, :register_env, :register, :method_missing
+  def_delegators :container, :register_env, :register, :method_missing, :[]
 
   class Factory
     def initialize(klass, dependencies)
